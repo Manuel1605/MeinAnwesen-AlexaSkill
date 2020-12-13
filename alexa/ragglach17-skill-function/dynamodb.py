@@ -13,7 +13,8 @@ def query_pool_temperature(current_datetime, dynamodb=None):
     response = table.query(
         KeyConditionExpression=(Key("sensorId").eq(POOL_TEMPERATURE_SENSOR_ID)
                                 & Key('timestamp').gt(milliseconds-(3600*1000))),
-        Limit=1
+        Limit=1,
+        ScanIndexForward=False
     )
     result = None
     if len(response['Items']) == 1:
