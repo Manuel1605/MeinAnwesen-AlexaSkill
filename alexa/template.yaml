@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  ragglach17-skill
+
+  SAM Template for ragglach17-skill
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  Ragglach17SkillFunction:
+    Type: AWS::Serverless::Function
+    Policies: AWSLambdaDynamoDBExecutionRole
+    Properties:
+      CodeUri: ragglach17-skill-function/
+      Handler: app.handler
+      Runtime: python3.7
+      Events:
+        AlexaSkillEvent:
+          SkillId: amzn1.ask.skill.bdacaf2d-9aaa-4696-a944-c0351f5a1fc4
+          Type: AlexaSkill
+  Ragglach17SensorData:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Ragglach17SensorData
+      AttributeDefinitions:
+        - AttributeName: sensorId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: sensorId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
