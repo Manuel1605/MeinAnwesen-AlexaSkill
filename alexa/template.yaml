@@ -12,11 +12,16 @@ Globals:
 Resources:
   Ragglach17SkillFunction:
     Type: AWS::Serverless::Function
-    Policies: AWSLambdaDynamoDBExecutionRole
     Properties:
       CodeUri: ragglach17-skill-function/
       Handler: app.handler
       Runtime: python3.7
+      Policies: AmazonDynamoDBReadOnlyAccess
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: "Ragglach17SensorData"
+          POOL_TEMPERATURE_SENSOR_ID: "dummy"
+          POOL_TEMPERATURE_SENSOR_ID2: "dummy"
       Events:
         AlexaSkillEvent:
           SkillId: amzn1.ask.skill.bdacaf2d-9aaa-4696-a944-c0351f5a1fc4
