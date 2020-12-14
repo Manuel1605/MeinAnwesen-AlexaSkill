@@ -17,7 +17,7 @@ def query_pool_temperature(current_datetime, dynamodb=None):
         ScanIndexForward=False
     )
     result = None
-    if len(response['Items']) == 1:
+    if len(response['Items']) > 0:
         result = response['Items'][0]['sensor_value']
     return result
 

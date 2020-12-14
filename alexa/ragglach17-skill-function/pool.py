@@ -4,11 +4,11 @@ import dynamodb
 
 
 def get_pool_temperature_response_data(handler_input):
-    pool_temperature = round(dynamodb.query_pool_temperature(time))
+    pool_temperature_raw_value = dynamodb.query_pool_temperature(time)
     response_builder = handler_input.response_builder
 
-    if pool_temperature is not None:
-
+    if pool_temperature_raw_value is not None:
+        pool_temperature = round(pool_temperature_raw_value)
         speech = f'Die Pool Temperatur beträgt {pool_temperature} Grad'
         card = ui.SimpleCard("Pool Temperatur", f'{pool_temperature}° C')
     else:
