@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  Ragglach17SensorDataTableName:
+    Type: String
+    Default: Ragglach17SensorData
+    Description: The dynamoDB table where the sensor data should be stored
+Resources:
+  PoolTemperatureSensor:
+    Type: AWS::IoT::Thing
+    Properties:
+      ThingName: PoolTemperatureSensor
+
+  PoolTemperatureCertificate:
+    Type: AWS::IoT::Certificate
+    Properties:
+      Status: ACTIVE
+    DeletionPolicy: Delete
+
+  PoolTemperatureSensorPrincipalAttachment:
+    Type: AWS::IoT::ThingPrincipalAttachment
+    Properties:
+      Principal: !GetAtt PoolTemperatureCertificate.Arn
+      ThingName: !Ref PoolTemperatureSensor
+
+  PoolTemperatureSensorUploadDataPolicy:
+    Type: AWS::IoT::Policy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - iot:Connect
+            Resource:
+              - !Sub 'arn:aws:iot:${AWS::Region}:${AWS::AccountId}:client/${!iot:Connection.Thing.ThingName}'
+          - Effect: Allow
+            Action:
+              - iot:Publish
+            Resource:
+              - !Sub 'arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topic/pool-temperature'
+              - !Sub 'arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topic/${!iot:Connection.Thing.ThingName}/*'
+      PolicyName: PoolTemperatureSensorUploadDataPolicy
+
+  PoolTemperatureSensorCertificatePolicyAttachment:
+    Type: AWS::IoT::PolicyPrincipalAttachment
+    Properties:
+      PolicyName: !Ref PoolTemperatureSensorUploadDataPolicy
+      Principal: !GetAtt PoolTemperatureCertificate.Arn
+
+  PoolTemperatureTopicRuleRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: PoolTemperatureTopicRuleRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: PoolTemperatureTopicRulePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:PutItem'
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${Ragglach17SensorDataTableName}'
+
+
+  PoolTemperatureTopicRule:
+    Type: AWS::IoT::TopicRule
+    Properties:
+      RuleName: PoolTemperatureTopicRule
+      TopicRulePayload:
+        Actions:
+          - DynamoDBv2:
+              PutItem:
+                TableName: !Ref Ragglach17SensorDataTableName
+              RoleArn: !GetAtt PoolTemperatureTopicRuleRole.Arn
+        AwsIotSqlVersion: 2016-03-23
+        Description: String
+        RuleDisabled: false
+        Sql: SELECT * FROM 'pool-temperature'
