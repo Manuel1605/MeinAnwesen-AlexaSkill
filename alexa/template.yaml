@@ -20,8 +20,7 @@ Resources:
       Environment:
         Variables:
           DYNAMODB_TABLE_NAME: "Ragglach17SensorData"
-          POOL_TEMPERATURE_SENSOR_ID: "dummy"
-          POOL_TEMPERATURE_SENSOR_ID2: "dummy"
+          POOL_TEMPERATURE_SENSOR_ID: "pool_temp_1"
       Events:
         AlexaSkillEvent:
           SkillId: amzn1.ask.skill.bdacaf2d-9aaa-4696-a944-c0351f5a1fc4
